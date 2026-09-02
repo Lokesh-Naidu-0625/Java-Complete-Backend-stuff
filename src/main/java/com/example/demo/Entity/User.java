@@ -2,13 +2,14 @@ package com.example.demo.Entity;
 
 
 import com.example.demo.dependentpackage.UserRole;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import jakarta.persistence.Entity;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -33,6 +34,24 @@ public class User {
     private String phone;
     private UserRole role = UserRole.CUSTOMER ;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    // One User has exactly one Address.
+// cascade = ALL → operations on User also apply to Address.
+// orphanRemoval = true → removes Address when it is no longer associated with User.
+    @JoinColumn(name="address_id", referencedColumnName = "id")
+    // Creates a foreign key column "address_id" in this table,
+// which references the "id" column of Address.
+    private Address address;
+
+
+    @CreationTimestamp
+    private LocalDateTime createAT;
+    // Automatically stores the date & time when the record is created.
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAT;
+    // Automatically updates the date & time whenever the record is modified
+
 //    public User(Long id, String fname, String lname) {
 //        this.id = id;
 //        this.fname = fname;
@@ -42,7 +61,5 @@ public class User {
 //    public User (){
 //
 //    }
-
-
 
 }
