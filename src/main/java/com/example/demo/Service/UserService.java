@@ -1,6 +1,10 @@
 package com.example.demo.Service;
 
 
+import com.example.demo.DTO.AddressDTO;
+import com.example.demo.DTO.UserRequest;
+import com.example.demo.DTO.UserResponse;
+import com.example.demo.Entity.Address;
 import com.example.demo.Entity.User;
 import com.example.demo.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +15,7 @@ import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,16 +40,38 @@ public class UserService {
 //        this.userRepository = userRepository;
 //    }
 
-    public List<User> fetchallusers(){
-        return userRepository.findAll();
+    public List<UserResponse> fetchallusers(){
+        List<User> userList = userRepository.findAll();
+        return userRepository.findAll().stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
     }
 
-    public String createuser(User user){
+    public String createuser(UserRequest userRequest){
 //        user.setId(nextId++);
 //        on the above line we are incrementing the id of the user automatically
+        User user = new User();
+        updateUserFromRequest(user,userRequest);
         userRepository.save(user);
 //        userList.add(user);
         return "user is added successfully";
+    }
+
+    public  void updateUserFromRequest(User user, UserRequest userRequest){
+        user.setfname(userRequest.getFname());
+        user.setlname(userRequest.getLname());
+        user.setEmail(userRequest.getEmail());
+        user.setPhone(userRequest.getPhone());
+
+        if(userRequest.getAddress() != null){
+            Address address = new Address();
+            address.setStreet(userRequest.getAddress().getStreet());
+            address.setCity(userRequest.getAddress().getCity());
+            address.setState(userRequest.getAddress().getState());
+            address.setZipcode(userRequest.getAddress().getZipcode());
+            address.setCountry(userRequest.getAddress().getCountry());
+            user.setAddress(address);
+        }
     }
 
 //    public User getbyid(Long id){
@@ -55,14 +82,15 @@ public class UserService {
 //        return null;
 //    }
 
-    public Optional<User> fetchuser(Long id){
+    public Optional<UserResponse> fetchuser(Long id){
 //        return userList.stream()
 //                .filter(user -> user.getId().equals(id))
 //                .findFirst();
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+                .map(this::mapToUserResponse);
     }
 
-    public boolean updateuser(Long id, User updateduser){
+    public boolean updateuser(Long id, UserRequest updateUserRequest){
 
 //        return userList.stream()
 //                .filter(user -> user.getId().equals(id))
@@ -96,10 +124,32 @@ public class UserService {
 
         return userRepository.findById(id)
                 .map(existinguser -> {
-                    existinguser.setfname(updateduser.getFname());
-                    existinguser.setlname(updateduser.getLname());
+//                    existinguser.setfname(updateduser.getFname());
+//                    existinguser.setlname(updateduser.getLname());
+                    updateUserFromRequest(existinguser,updateUserRequest);
                     userRepository.save(existinguser);
                     return true;
                 }).orElse(false);
+    }
+
+    private UserResponse mapToUserResponse(User user){
+        UserResponse response = new UserResponse();
+        response.setId(String.valueOf(user.getId()));
+        response.setFname(user.getFname());
+        response.setLname(user.getLname());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+
+        if(user.getAddress() !=null){
+            AddressDTO addressDTO = new AddressDTO();
+            addressDTO.setStreet(user.getAddress().getStreet());
+            addressDTO.setCountry(user.getAddress().getCountry());
+            addressDTO.setZipcode(user.getAddress().getZipcode());
+            addressDTO.setCity(user.getAddress().getCity());
+            addressDTO.setState(user.getAddress().getCity());
+            response.setAddress(addressDTO);
+        }
+
+        return response;
     }
 }

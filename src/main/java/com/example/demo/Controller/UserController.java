@@ -4,6 +4,8 @@ package com.example.demo.Controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.DTO.UserRequest;
+import com.example.demo.DTO.UserResponse;
 import com.example.demo.Entity.User;
 import com.example.demo.Service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +57,7 @@ public class UserController {
 
 // Equivalent older/general way:
 // @RequestMapping(value = "/api/users", method = RequestMethod.GET)
-    public ResponseEntity<List<User>> getallusers(){
+    public ResponseEntity<List<UserResponse>> getallusers(){
         // ResponseEntity.ok() is a static factory method.
 // It internally creates and returns a ResponseEntity object
 // with HTTP status 200 OK and the given data as the response body.
@@ -76,13 +78,13 @@ public class UserController {
 
 
     @PostMapping("/api/users")
-    public ResponseEntity<String> adduser(@RequestBody User user){
-        userService.createuser(user);
+    public ResponseEntity<String> adduser(@RequestBody UserRequest userRequest){
+        userService.createuser(userRequest);
         return ResponseEntity.ok("user is added successfully");
     }
 
     @GetMapping("/api/user/{id}")
-    public ResponseEntity<User> getuserbyid(@PathVariable Long id){
+    public ResponseEntity<UserResponse> getuserbyid(@PathVariable Long id){
 //        return userService.getbyid(id);
 //        User user = userService.getbyid(id);
 //        if (user == null){
@@ -96,8 +98,8 @@ public class UserController {
     }
 
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<String> updatedUser(@PathVariable Long id, @RequestBody User updateduser){
-        boolean bol = userService.updateuser(id,updateduser);
+    public ResponseEntity<String> updatedUser(@PathVariable Long id, @RequestBody UserRequest updateUserRequest){
+        boolean bol = userService.updateuser(id,updateUserRequest);
         if(bol)
             return ResponseEntity.ok("user is updated successfully");
         return ResponseEntity.notFound().build();
