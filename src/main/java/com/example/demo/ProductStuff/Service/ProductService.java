@@ -6,7 +6,10 @@ import com.example.demo.ProductStuff.DTO.ProductResponse;
 import com.example.demo.ProductStuff.Entity.Product;
 import com.example.demo.ProductStuff.Repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,15 @@ public class ProductService {
         product.setDescription(productRequest.getDescription());
         product.setStockquantity(productRequest.getStockquantity());
         product.setImageURL(productRequest.getImageURL());
+    }
+
+    public Optional<ProductResponse> updateproduct(Long id, ProductRequest productrequest) {
+        return productRepository.findById(id)
+                .map(exisitingproduct -> {
+                    updateProductFromRequest(exisitingproduct, productrequest);
+                    Product savedproduct = productRepository.save(exisitingproduct);
+                    return mapToProductResponse(savedproduct);
+                });
+
     }
 }
